@@ -181,7 +181,32 @@ public class CollisionManager : MonoBehaviour
                 // add the new contact
                 a.contacts.Add(contactB);
                 a.isColliding = true;
-                
+
+                if (contactB.face != Vector3.down && contactB.face != Vector3.up) // (a.name == "Player" || b.name == "Player") && 
+                {
+                    RigidBody3D a_rid = a.GetComponentInParent<RigidBody3D>();
+                    RigidBody3D b_rid = b.GetComponentInParent<RigidBody3D>();
+
+                    if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.STATIC)
+                    {
+                        Debug.Log("collided with static b");
+                        a.transform.position = a.transform.position - contactB.face * contactB.penetration * 1;
+                    }
+                    else if (a_rid.bodyType == BodyType.STATIC && b_rid.bodyType == BodyType.DYNAMIC)
+                    {
+                        Debug.Log("collided with static a");
+                        b.transform.position = b.transform.position + contactB.face * contactB.penetration * 1;
+                    }
+                    else if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.DYNAMIC)
+                    {
+                        if (a.name == "Player" || b.name == "Player")
+                            Debug.Log("face: " + contactB.face);
+                        //a.transform.position = a.transform.position - contactB.face * contactB.penetration * 0.5f;
+                        //b.transform.position = b.transform.position + contactB.face * contactB.penetration * 0.5f;
+                    }
+
+                    
+                }
             }
         }
         else
