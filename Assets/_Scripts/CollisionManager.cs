@@ -222,6 +222,7 @@ public class CollisionManager : MonoBehaviour
                 if (contactB.face == Vector3.down)
                 {
                     a.gameObject.GetComponent<RigidBody3D>().Stop();
+                    a.gameObject.GetComponent<RigidBody3D>().velocity.y = 0.0f;
                     a.isGrounded = true;
                 }
                 
@@ -242,7 +243,7 @@ public class CollisionManager : MonoBehaviour
 
                 if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.STATIC)
                 {
-                    a.transform.position = a.transform.position - contactB.face * contactB.penetration * 1;
+                    a.transform.position = a.transform.position - contactB.face * contactB.penetration * 1.0f;
                 }
                 else if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.DYNAMIC)
                 {
@@ -266,19 +267,19 @@ public class CollisionManager : MonoBehaviour
             }
         }
         else
+        if (a.contacts.Exists(x => x.cube.gameObject.name == b.gameObject.name))
         {
-
-            if (a.contacts.Exists(x => x.cube.gameObject.name == b.gameObject.name))
             {
                 a.contacts.Remove(a.contacts.Find(x => x.cube.gameObject.name.Equals(b.gameObject.name)));
                 a.isColliding = false;
 
                 if (a.gameObject.GetComponent<RigidBody3D>().bodyType == BodyType.DYNAMIC)
                 {
-                    a.gameObject.GetComponent<RigidBody3D>().isFalling = true;
+                    a.gameObject.GetComponent<RigidBody3D>().isFalling = 1;
                     a.isGrounded = false;
                 }
             }
         }
     }
+
 }

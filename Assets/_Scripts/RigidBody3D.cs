@@ -17,7 +17,7 @@ public class RigidBody3D : MonoBehaviour
     public float mass;
     public BodyType bodyType;
     public float timer;
-    public bool isFalling;
+    public int isFalling;
 
     [Header("Attributes")]
     public Vector3 velocity;
@@ -33,7 +33,7 @@ public class RigidBody3D : MonoBehaviour
         acceleration = new Vector3(0.0f, gravity * gravityScale, 0.0f);
         if (bodyType == BodyType.DYNAMIC)
         {
-            isFalling = true;
+            isFalling = 1;
         }
     }
 
@@ -42,7 +42,7 @@ public class RigidBody3D : MonoBehaviour
     {
         if (bodyType == BodyType.DYNAMIC)
         {
-            if (isFalling)
+            if (isFalling == 1)
             {
                 timer += Time.deltaTime;
                 
@@ -57,12 +57,16 @@ public class RigidBody3D : MonoBehaviour
                     transform.position += velocity;
                 }
             }
+            else if (isFalling > 1)
+            {
+                isFalling -= 1;
+            }
         }
     }
 
     public void Stop()
     {
         timer = 0;
-        isFalling = false;
+        isFalling = 0;
     }
 }
