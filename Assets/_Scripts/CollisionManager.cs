@@ -7,7 +7,7 @@ using UnityEngine;
 public class CollisionManager : MonoBehaviour
 {
     public CubeBehaviour[] cubes;
-    public BulletBehaviour[] spheres;
+    public BulletBehaviour[] bullets;
 
     private static Vector3[] faces;
 
@@ -27,7 +27,7 @@ public class CollisionManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        spheres = FindObjectsOfType<BulletBehaviour>();
+        bullets = FindObjectsOfType<BulletBehaviour>();
 
         // check each AABB with every other AABB in the scene
         for (int i = 0; i < cubes.Length; i++)
@@ -42,19 +42,68 @@ public class CollisionManager : MonoBehaviour
         }
 
         // Check each sphere against each AABB in the scene
-        foreach (var sphere in spheres)
+        foreach (var bullet in bullets)
         {
             foreach (var cube in cubes)
             {
                 if (cube.name != "Player")
                 {
-                    CheckSphereAABB(sphere, cube);
+                    CheckBulletAABB(bullet, cube);
                 }
                 
             }
         }
 
 
+    }
+
+    public static void CheckBulletAABB(BulletBehaviour a, CubeBehaviour b)
+    {
+        if ((a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+            (a.min.y <= b.max.y && a.max.y >= b.min.y) &&
+            (a.min.z <= b.max.z && a.max.z >= b.min.z) && (!a.isColliding))
+        {
+            float depth = 0.0f;
+            Vector3 normal = Vector3.zero;
+
+            Vector3[] faces = new Vector3[6];
+            faces[0] = new Vector3(-1, 0, 0);
+            faces[1] = new Vector3(1, 0, 0);
+            faces[2] = new Vector3(0, -1, 0);
+            faces[3] = new Vector3(0, 1, 0);
+            faces[4] = new Vector3(0, 0, -1);
+            faces[5] = new Vector3(0, 0, 1);
+
+            float[] dists = new float[6];
+            dists[0] = a.max.x - b.min.x;
+            dists[1] = b.max.x - a.min.x;
+            dists[2] = a.max.y - b.min.y;
+            dists[3] = b.max.y - a.min.y;
+            dists[4] = a.max.z - b.min.z;
+            dists[5] = b.max.z - a.min.z;
+
+            float min = float.MaxValue;
+            for (int i = 0; i < 6; i++)
+            {
+                if (dists[i] < min || i == 0)
+                {
+                    normal = faces[i];
+                    depth = dists[i];
+                    min = dists[i];
+                }
+            }
+
+            Debug.Log(normal);
+
+            a.penetration = depth;
+            a.collisionNormal = normal;
+
+            a.transform.position = a.transform.position + normal * depth;
+            
+            Reflect(a);
+
+            a._Move();
+        }
     }
 
     public static void CheckSphereAABB(BulletBehaviour s, CubeBehaviour b)
@@ -193,7 +242,6 @@ public class CollisionManager : MonoBehaviour
 
                 if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.STATIC)
                 {
-                    Debug.Log("collided with static b");
                     a.transform.position = a.transform.position - contactB.face * contactB.penetration * 1;
                 }
                 else if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.DYNAMIC)
