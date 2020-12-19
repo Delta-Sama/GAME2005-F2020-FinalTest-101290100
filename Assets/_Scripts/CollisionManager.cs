@@ -93,8 +93,6 @@ public class CollisionManager : MonoBehaviour
                 }
             }
 
-            Debug.Log(normal);
-
             a.penetration = depth;
             a.collisionNormal = normal;
 
@@ -147,7 +145,6 @@ public class CollisionManager : MonoBehaviour
             s.collisionNormal = face;
             //s.isColliding = true;
 
-            
             Reflect(s);
         }
 
@@ -230,40 +227,34 @@ public class CollisionManager : MonoBehaviour
                 // add the new contact
                 a.contacts.Add(contactB);
                 a.isColliding = true;
-
-                RigidBody3D a_rid = a.GetComponentInParent<RigidBody3D>();
-                RigidBody3D b_rid = b.GetComponentInParent<RigidBody3D>();
             }
 
             // Resolving even if they had a collision before
-            if (true) // (a.name == "Player" || b.name == "Player") && contactB.face != Vector3.down && contactB.face != Vector3.up
+            RigidBody3D a_rid = a.GetComponentInParent<RigidBody3D>();
+            RigidBody3D b_rid = b.GetComponentInParent<RigidBody3D>();
+
+            if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.STATIC)
             {
-                RigidBody3D a_rid = a.GetComponentInParent<RigidBody3D>();
-                RigidBody3D b_rid = b.GetComponentInParent<RigidBody3D>();
+                a.transform.position = a.transform.position - contactB.face * contactB.penetration * 1.0f;
+            }
+            else if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.DYNAMIC)
+            {
+                float prop1 = 0.5f;
+                float prop2 = 0.5f;
 
-                if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.STATIC)
+                if (contactB.face == Vector3.up)
                 {
-                    a.transform.position = a.transform.position - contactB.face * contactB.penetration * 1.0f;
+                    prop1 = 0.0f;
+                    prop2 = 0.5f;
                 }
-                else if (a_rid.bodyType == BodyType.DYNAMIC && b_rid.bodyType == BodyType.DYNAMIC)
+                else if (contactB.face == Vector3.down)
                 {
-                    float prop1 = 0.5f;
-                    float prop2 = 0.5f;
-
-                    if (contactB.face == Vector3.up)
-                    {
-                        prop1 = 0.0f;
-                        prop2 = 0.5f;
-                    }
-                    else if (contactB.face == Vector3.down)
-                    {
-                        prop1 = 0.5f;
-                        prop2 = 0.0f;
-                    }
-
-                    a.transform.position = a.transform.position - contactB.face * contactB.penetration * prop1;
-                    b.transform.position = b.transform.position + contactB.face * contactB.penetration * prop2;
+                    prop1 = 0.5f;
+                    prop2 = 0.0f;
                 }
+
+                a.transform.position = a.transform.position - contactB.face * contactB.penetration * prop1;
+                b.transform.position = b.transform.position + contactB.face * contactB.penetration * prop2;
             }
         }
         else
