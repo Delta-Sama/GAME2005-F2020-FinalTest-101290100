@@ -76,7 +76,7 @@ public class PlayerBehaviour : MonoBehaviour
 
             if (Input.GetAxisRaw("Jump") > 0.0f)
             {
-                body.velocity = transform.up * speed * 2.0f * Time.deltaTime;
+                body.velocity = transform.up * speed * 3.0f * Time.deltaTime;
             }
 
             transform.position += body.velocity;
